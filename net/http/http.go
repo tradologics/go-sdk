@@ -9,7 +9,14 @@ import (
 	_http "net/http"
 	"net/url"
 	"strings"
-	"time"
+)
+
+const (
+	baseHost       = "api.tradologics.com"
+	baseSchema     = "https"
+	basePath       = "/v1"
+	socketUrl      = "tcp://0.0.0.0:3003"
+	defaultTimeout = 5
 )
 
 var Token string
@@ -21,51 +28,14 @@ var NewRequestWithContext = _http.NewRequestWithContext
 type Request _http.Request
 type Response _http.Response
 type Header _http.Header
-
-type Config struct {
-	baseSchema     string
-	basePath       string
-	baseHost       string
-	defaultTimeout int
-	socketUrl      string
-}
-
-type Client struct {
-	cln *_http.Client
-	cfg *Config
-
-	Transport     _http.RoundTripper
-	Jar           _http.CookieJar
-	Timeout       time.Duration
-	CheckRedirect func(req *Request, via []*Request) error
-}
+type Client _http.Client
 
 func NewDefaultClient() *Client {
-	cfg := &Config{
-		baseHost:       "api.tradologics.com",
-		baseSchema:     "https",
-		basePath:       "/v1",
-		socketUrl:      "tcp://0.0.0.0:3003",
-		defaultTimeout: 5,
-	}
-
-	cln := _http.DefaultClient
-	// TODO timeout
-	//cln.Timeout = time.Duration(cfg.defaultTimeout)
-
-	return &Client{
-		cfg: cfg,
-		cln: cln,
-	}
+	return &Client{Timeout: defaultTimeout}
 }
 
 var DefaultClient = NewDefaultClient()
-
-func (c *Client) isConfigured() {
-	if c.cln == nil {
-		// TODO default client
-	}
-}
+var httpDefaultClient = _http.DefaultClient
 
 func newRequestWithContentType(method, url string, contentType string, body io.Reader) (*_http.Request, error) {
 	req, err := NewRequest(method, url, body)
@@ -80,20 +50,16 @@ func newRequestWithContentType(method, url string, contentType string, body io.R
 }
 
 func (c *Client) Do(req *_http.Request) (*_http.Response, error) {
-	c.isConfigured()
 
-	// If url include protocol, then use default client
+	// If url include protocol, then use default http client
 	if (req.URL != nil && req.URL.Scheme != "") || req.Host != "" && !includeProtocol(req.Host) {
-		return c.cln.Do(req)
+		return httpDefaultClient.Do(req)
 	}
 	return c.processRequest(req.Method, req.URL.Path, "", req.Body, req.Header)
 
 }
 
-// TODO Is default exists
-
 func (c *Client) processRequest(method, url, contentType string, body io.Reader, header _http.Header) (*_http.Response, error) {
-	c.isConfigured()
 
 	if includeProtocol(url) {
 		req, err := newRequestWithContentType(method, url, contentType, body)
@@ -102,11 +68,11 @@ func (c *Client) processRequest(method, url, contentType string, body io.Reader,
 		}
 		req.Header = header
 
-		return c.cln.Do(req)
+		return httpDefaultClient.Do(req)
 	}
 
 	if IsBacktest {
-		// TODO handler error
+		// TODO error handler
 		req, err := newRequestWithContentType(method, url, contentType, body)
 		if err != nil {
 			return nil, err
@@ -120,7 +86,7 @@ func (c *Client) processRequest(method, url, contentType string, body io.Reader,
 		return res, nil
 	}
 
-	fullUrl := fmt.Sprintf("%s://%s%s%s", c.cfg.baseSchema, c.cfg.baseHost, c.cfg.basePath, url)
+	fullUrl := fmt.Sprintf("%s://%s%s%s", baseSchema, baseHost, basePath, url)
 	req, err := newRequestWithContentType(method, fullUrl, contentType, body)
 	if err != nil {
 		return nil, err
@@ -133,12 +99,11 @@ func (c *Client) processRequest(method, url, contentType string, body io.Reader,
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", Token))
 	}
 
-	// TODO host and url FIX IT
 	if strings.HasSuffix(req.URL.Path, "/") {
 		req.URL.Path = req.URL.Path[:len(req.URL.Path)-1]
 	}
 
-	r, err := DefaultClient.cln.Do(req)
+	r, err := httpDefaultClient.Do(req)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -182,7 +147,7 @@ func SetToken(token string) {
 }
 
 func SetBacktestMode(start, end string) (err error) {
-	Backtest, err = goSdk.NewBacktest(start, end, DefaultClient.cfg.socketUrl)
+	Backtest, err = goSdk.NewBacktest(start, end, socketUrl)
 	if err != nil {
 		return err
 	}

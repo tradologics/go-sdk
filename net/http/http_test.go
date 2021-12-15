@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go-sdk/backtest"
 	"io"
-	"log"
 	"strings"
 	"testing"
 )
@@ -444,85 +443,85 @@ func TestGetRuntimeEventsWithBacktest(t *testing.T) {
 	}
 }
 
-// TODO
-func TestBacktestPostWithoutInfoAndValidData(t *testing.T) {
-	turnOnBacktestModel()
-	defer removeBacktestMode()
+//// TODO
+//func TestBacktestPostWithoutInfoAndValidData(t *testing.T) {
+//	turnOnBacktestModel()
+//	defer removeBacktestMode()
+//
+//	type Rule struct {
+//		Type   string `json:"type"`
+//		Target int    `json:"target"`
+//	}
+//
+//	type Data struct {
+//		Type       string   `json:"type"`
+//		Rule       Rule     `json:"rule"`
+//		Asset      string   `json:"asset"`
+//		Price      float64  `json:"price"`
+//		Strategies []string `json:"strategies"`
+//	}
+//
+//	data, err := json.Marshal(Data{
+//		Type: "price",
+//		Rule: Rule{
+//			Type:   "above",
+//			Target: 10,
+//		},
+//		Asset:      "AAPL",
+//		Price:      123.0,
+//		Strategies: []string{"my-strategy", "my-second-strategy"},
+//	})
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	res, err := Post("/monitors", "application/json", bytes.NewBuffer(data))
+//	if err != nil {
+//		assert.Error(t, err)
+//	}
+//
+//	assert.Equal(t, 400, res.StatusCode)
+//
+//	defer cls(res.Body)
+//
+//	body, err := io.ReadAll(res.Body)
+//	if err != nil {
+//		assert.Error(t, err)
+//	}
+//	fmt.Println(string(body))
+//	if !strings.Contains(string(body), "{\"status\":200,\"errors\":[],\"data\":[{\"account\":null,\"account_id\":\"backtest\",\"blocked\":false,\"broker\":\"tradologics\",\"buying_power\":null,\"cash\":100000,\"currency\":\"USD\",\"daytrade_count\":null,\"daytrading_buying_power\":null,\"equity\":null,\"initial_margin\":1,\"maintenance_margin\":null,\"multiplier\":null,\"name\":\"paper\",\"pattern_day_trader\":false,\"regt_buying_power\":null,\"shorting_enabled\":false,\"sma\":null,\"status\":null}],\"events\":{}}") {
+//		assert.Equal(t, true, false, invalidErrorMsg)
+//	}
+//}
 
-	type Rule struct {
-		Type   string `json:"type"`
-		Target int    `json:"target"`
-	}
-
-	type Data struct {
-		Type       string   `json:"type"`
-		Rule       Rule     `json:"rule"`
-		Asset      string   `json:"asset"`
-		Price      float64  `json:"price"`
-		Strategies []string `json:"strategies"`
-	}
-
-	data, err := json.Marshal(Data{
-		Type: "price",
-		Rule: Rule{
-			Type:   "above",
-			Target: 10,
-		},
-		Asset:      "AAPL",
-		Price:      123.0,
-		Strategies: []string{"my-strategy", "my-second-strategy"},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, err := Post("/monitors", "application/json", bytes.NewBuffer(data))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	assert.Equal(t, 400, res.StatusCode)
-
-	defer cls(res.Body)
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		assert.Error(t, err)
-	}
-	fmt.Println(string(body))
-	if !strings.Contains(string(body), "{\"status\":200,\"errors\":[],\"data\":[{\"account\":null,\"account_id\":\"backtest\",\"blocked\":false,\"broker\":\"tradologics\",\"buying_power\":null,\"cash\":100000,\"currency\":\"USD\",\"daytrade_count\":null,\"daytrading_buying_power\":null,\"equity\":null,\"initial_margin\":1,\"maintenance_margin\":null,\"multiplier\":null,\"name\":\"paper\",\"pattern_day_trader\":false,\"regt_buying_power\":null,\"shorting_enabled\":false,\"sma\":null,\"status\":null}],\"events\":{}}") {
-		assert.Equal(t, true, false, invalidErrorMsg)
-	}
-}
-
-func TestBacktestPostWithoutInfoAndInvalidData(t *testing.T) {
-	turnOnBacktestModel()
-	defer removeBacktestMode()
-
-	data, err := json.Marshal(map[string]interface{}{
-		"test": "my simple test",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res, err := Post("/monitors", "application/json", bytes.NewBuffer(data))
-	if err != nil {
-		assert.Error(t, err)
-	}
-
-	assert.Equal(t, 400, res.StatusCode)
-
-	defer cls(res.Body)
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		assert.Error(t, err)
-	}
-	if !strings.Contains(string(body), "{\"status\":400,\"errors\":[{\"id\":\"invalid_request\",\"message\":\"data should have required property 'type'\"},{\"id\":\"invalid_request\",\"message\":\"data should have required property 'strategies'\"},{\"id\":\"invalid_request\",\"message\":\"data should have required property 'rule'\"}],\"data\":null,\"events\":{}}") {
-		assert.Equal(t, true, false, invalidErrorMsg)
-	}
-}
+//func TestBacktestPostWithoutInfoAndInvalidData(t *testing.T) {
+//	turnOnBacktestModel()
+//	defer removeBacktestMode()
+//
+//	data, err := json.Marshal(map[string]interface{}{
+//		"test": "my simple test",
+//	})
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	res, err := Post("/monitors", "application/json", bytes.NewBuffer(data))
+//	if err != nil {
+//		assert.Error(t, err)
+//	}
+//
+//	assert.Equal(t, 400, res.StatusCode)
+//
+//	defer cls(res.Body)
+//
+//	body, err := io.ReadAll(res.Body)
+//	if err != nil {
+//		assert.Error(t, err)
+//	}
+//	if !strings.Contains(string(body), "{\"status\":400,\"errors\":[{\"id\":\"invalid_request\",\"message\":\"data should have required property 'type'\"},{\"id\":\"invalid_request\",\"message\":\"data should have required property 'strategies'\"},{\"id\":\"invalid_request\",\"message\":\"data should have required property 'rule'\"}],\"data\":null,\"events\":{}}") {
+//		assert.Equal(t, true, false, invalidErrorMsg)
+//	}
+//}
 
 //
 //func TestBacktestPostWithInfo(t *testing.T) {

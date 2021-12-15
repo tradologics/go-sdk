@@ -67,8 +67,7 @@ func NewBacktest(start, end, socketUrl string) (*Backtest, error) {
 
 func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
 	var erocResponse ErocResponse
-	var erocResponseData ErocRequestData
-	var requestData ErocRequestData
+	erocResponseData := ErocRequestData{}
 
 	if req.Body != nil {
 		body, err := ioutil.ReadAll(req.Body)
@@ -76,14 +75,10 @@ func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 
-		err = json.Unmarshal(body, &requestData)
+		err = json.Unmarshal(body, &erocResponseData)
 		if err != nil {
 			return nil, err
 		}
-
-		erocResponseData = requestData
-	} else {
-		erocResponseData = ErocRequestData{}
 	}
 
 	erocRequest := &ErocRequest{
