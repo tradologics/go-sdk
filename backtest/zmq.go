@@ -3,25 +3,21 @@ package backtest
 import (
 	"encoding/json"
 	"gopkg.in/zeromq/goczmq.v4"
-	"log"
 )
 
 type ZmqConn struct {
 	req *goczmq.Sock
 }
 
-func NewZmq(socketUrl string) *ZmqConn {
+func NewZmq(socketUrl string) (*ZmqConn, error) {
 
 	// Create a new Req socket and connect it to the router.
 	req, err := goczmq.NewReq(socketUrl)
 	if err != nil {
-		// TODO
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return &ZmqConn{
-		req,
-	}
+	return &ZmqConn{req}, nil
 }
 
 func (z *ZmqConn) SendMsg(msg []byte) error {
@@ -31,8 +27,6 @@ func (z *ZmqConn) SendMsg(msg []byte) error {
 }
 
 func (z *ZmqConn) SendJSON(src interface{}) error {
-
-	// Convert to json
 	srcJSON, err := json.Marshal(src)
 	if err != nil {
 		return err
@@ -49,6 +43,7 @@ func (z *ZmqConn) ReceiveMsg() ([][]byte, error) {
 	msg, err := z.req.RecvMessage()
 	return msg, err
 }
+
 func (z *ZmqConn) ReceiveJSON(dst interface{}) error {
 	msg, err := z.req.RecvMessage()
 	if err != nil {

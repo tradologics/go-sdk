@@ -36,7 +36,8 @@ func TestRunServerWithStrategy(t *testing.T) {
 	}
 
 	body, err := io.ReadAll(res.Body)
-	assert.NotEqual(t, "ok", string(body), "invalid response")
+	assert.Equal(t, http.StatusText(http.StatusMethodNotAllowed), string(body), "invalid response")
+	assert.Equal(t, 405, res.StatusCode, "invalid response")
 	cls(res.Body)
 
 	// Post request
@@ -47,5 +48,6 @@ func TestRunServerWithStrategy(t *testing.T) {
 
 	body, err = io.ReadAll(res.Body)
 	assert.Equal(t, "ok", string(body), "invalid response")
+	assert.Equal(t, 200, res.StatusCode, "invalid response")
 	cls(res.Body)
 }

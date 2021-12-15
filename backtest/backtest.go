@@ -15,22 +15,13 @@ type ErocRequestHeader struct {
 	Resolution string `json:"resolution"`
 }
 
+type ErocRequestData map[string]interface{}
+
 type ErocRequest struct {
 	Method  string            `json:"method"`
 	Url     string            `json:"url"`
-	Data    []byte            `json:"data"`
+	Data    ErocRequestData   `json:"data"`
 	Headers ErocRequestHeader `json:"headers"`
-}
-
-type ErocResponseData struct {
-	Name        string `json:"name"`
-	StrategyID  string `json:"strategy_id"`
-	Description string `json:"description"`
-	AsTradelet  string `json:"as_tradelet"`
-	Mode        string `json:"mode"`
-	Url         string `json:"url"`
-	Public      bool   `json:"public"`
-	Datetime    string `json:"datetime"`
 }
 
 type ErocError struct {
@@ -38,18 +29,18 @@ type ErocError struct {
 	Message string `json:"message"`
 }
 
-type RuntimeEvents map[string]string
+type RuntimeEvents map[string]interface{}
 
 type ErocResponse struct {
-	Status int              `json:"status"`
-	Errors []ErocError      `json:"errors"`
-	Data   ErocResponseData `json:"data"`
-	Events RuntimeEvents    `json:"events"`
+	Status int           `json:"status"`
+	Errors []ErocError   `json:"errors"`
+	Data   interface{}   `json:"data,inline"`
+	Events RuntimeEvents `json:"events"`
 }
 
 type BarInfo struct {
-	datetime   string
-	resolution string
+	Datetime   string
+	Resolution string
 }
 
 type Backtest struct {
@@ -60,28 +51,50 @@ type Backtest struct {
 	zmqConn        *ZmqConn
 }
 
-func NewBacktest(start, end, socketUrl string) *Backtest {
-	zmqConn := NewZmq(socketUrl)
+func NewBacktest(start, end, socketUrl string) (*Backtest, error) {
+	zmqConn, err := NewZmq(socketUrl)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Backtest{
 		start:          start,
 		end:            end,
 		currentBarInfo: &BarInfo{},
 		zmqConn:        zmqConn,
-	}
+	}, nil
 }
 
 func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
 	var erocResponse ErocResponse
+	var erocResponseData ErocRequestData
+	var requestData ErocRequestData
+
+	if req.Body != nil {
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(body, &requestData)
+		if err != nil {
+			return nil, err
+		}
+
+		erocResponseData = requestData
+	} else {
+		erocResponseData = ErocRequestData{}
+	}
 
 	erocRequest := &ErocRequest{
 		Method: req.Method,
 		Url:    req.URL.String(),
+		Data:   erocResponseData,
 		Headers: ErocRequestHeader{
 			Start:      b.start,
 			End:        b.end,
-			Datetime:   b.currentBarInfo.datetime,
-			Resolution: b.currentBarInfo.resolution,
+			Datetime:   b.currentBarInfo.Datetime,
+			Resolution: b.currentBarInfo.Resolution,
 		},
 	}
 

@@ -11,6 +11,12 @@ var strategyHandler func(w http.ResponseWriter, r *http.Request)
 func postMethodOnlyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		strategyHandler(w, r)
+	} else {
+		w.WriteHeader(405)
+		_, err := w.Write([]byte(http.StatusText(http.StatusMethodNotAllowed)))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
