@@ -78,10 +78,7 @@ func (c *Client) processRequest(method, url, contentType string, body io.Reader,
 			return nil, err
 		}
 
-		res, err := Backtest.CallErocMethod(req)
-		if err != nil {
-			return nil, err
-		}
+		res := Backtest.CallErocMethod(req)
 
 		return res, nil
 	}

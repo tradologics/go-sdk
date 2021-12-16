@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -34,8 +35,13 @@ type RuntimeEvents map[string]interface{}
 type ErocResponse struct {
 	Status int           `json:"status"`
 	Errors []ErocError   `json:"errors"`
-	Data   interface{}   `json:"data,inline"`
+	Data   interface{}   `json:"data"`
 	Events RuntimeEvents `json:"events"`
+}
+
+type BacktestResponse struct {
+	Errors []ErocError `json:"errors"`
+	Data   interface{} `json:"data"`
 }
 
 type BarInfo struct {
@@ -65,26 +71,25 @@ func NewBacktest(start, end, socketUrl string) (*Backtest, error) {
 	}, nil
 }
 
-func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
-	var erocResponse ErocResponse
-	erocResponseData := ErocRequestData{}
+func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
+	erocRequestData := ErocRequestData{}
 
 	if req.Body != nil {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return nil, err
+			return b.errorHandler(req, err)
 		}
 
-		err = json.Unmarshal(body, &erocResponseData)
+		err = json.Unmarshal(body, &erocRequestData)
 		if err != nil {
-			return nil, err
+			return b.errorHandler(req, err)
 		}
 	}
 
 	erocRequest := &ErocRequest{
 		Method: req.Method,
 		Url:    req.URL.String(),
-		Data:   erocResponseData,
+		Data:   erocRequestData,
 		Headers: ErocRequestHeader{
 			Start:      b.start,
 			End:        b.end,
@@ -95,19 +100,23 @@ func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
 
 	err := b.zmqConn.SendJSON(&erocRequest)
 	if err != nil {
-		return nil, err
+		return b.errorHandler(req, err)
 	}
 
+	var erocResponse ErocResponse
 	err = b.zmqConn.ReceiveJSON(&erocResponse)
 	if err != nil {
-		return nil, err
+		return b.errorHandler(req, err)
 	}
 
 	b.runtimeEvents = erocResponse.Events
 
-	erocJSONResponse, err := json.Marshal(erocResponse)
+	erocJSONResponse, err := json.Marshal(BacktestResponse{
+		Errors: erocResponse.Errors,
+		Data:   erocResponse.Data,
+	})
 	if err != nil {
-		return nil, err
+		return b.errorHandler(req, err)
 	}
 
 	res := &http.Response{
@@ -124,8 +133,37 @@ func (b *Backtest) CallErocMethod(req *http.Request) (*http.Response, error) {
 	}
 	req.Response = res
 
-	return res, nil
+	return res
 
+}
+
+func (b *Backtest) errorHandler(req *http.Request, err error) *http.Response {
+	// TODO find correct error message
+	erocJSONResponse, err := json.Marshal(ErocResponse{
+		Status: 502,
+		Errors: []ErocError{{ID: "internal_server_error", Message: "internal server error"}},
+		Data:   make(map[string]interface{}),
+		Events: RuntimeEvents{},
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	res := &http.Response{
+		Body: ioutil.NopCloser(bytes.NewBuffer(erocJSONResponse)),
+
+		StatusCode: http.StatusBadGateway,
+		Status:     fmt.Sprintf("%d %s", http.StatusBadGateway, http.StatusText(http.StatusBadGateway)),
+
+		Proto:      req.Proto,
+		ProtoMajor: req.ProtoMajor,
+		ProtoMinor: req.ProtoMinor,
+
+		Request: req,
+	}
+	req.Response = res
+
+	return res
 }
 
 func (b *Backtest) SetCurrentBarInfo(info *BarInfo) {
