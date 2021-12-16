@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"go-sdk/backtest"
 	"io"
 	"log"
 	"reflect"
 	"strings"
 	"testing"
+	"tradologics/backtest"
 )
 
 const invalidErrorMsg = "invalid response"
 
-// TODO Remove it from git
 const token = ""
 
 func turnOnBacktestModel() {

@@ -3,12 +3,12 @@ package http
 import (
 	"errors"
 	"fmt"
-	goSdk "go-sdk/backtest"
 	"io"
 	"log"
 	_http "net/http"
 	"net/url"
 	"strings"
+	"tradologics/backtest"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 
 var Token string
 var IsBacktest bool
-var Backtest *goSdk.Backtest
+var Backtest *backtest.Backtest
 var NewRequest = _http.NewRequest
 var NewRequestWithContext = _http.NewRequestWithContext
 
@@ -144,7 +144,7 @@ func SetToken(token string) {
 }
 
 func SetBacktestMode(start, end string) (err error) {
-	Backtest, err = goSdk.NewBacktest(start, end, socketUrl)
+	Backtest, err = backtest.NewBacktest(start, end, socketUrl)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func SetBacktestMode(start, end string) (err error) {
 	return nil
 }
 
-func SetCurrentBarInfo(info *goSdk.BarInfo) error {
+func SetCurrentBarInfo(info *backtest.BarInfo) error {
 	if Backtest != nil {
 		Backtest.SetCurrentBarInfo(info)
 
