@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/tradologics/go-sdk/backtest"
 	"io"
 	"log"
 	"reflect"
 	"strings"
 	"testing"
-	"tradologics/backtest"
 )
 
 const invalidErrorMsg = "invalid response"

@@ -1,4 +1,4 @@
-module tradologics
+module github.com/tradologics/go-sdk
 
 go 1.17
 

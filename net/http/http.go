@@ -3,12 +3,12 @@ package http
 import (
 	"errors"
 	"fmt"
+	"github.com/tradologics/go-sdk/backtest"
 	"io"
 	"log"
 	_http "net/http"
 	"net/url"
 	"strings"
-	"tradologics/backtest"
 )
 
 const (
