@@ -163,7 +163,7 @@ func SetCurrentBarInfo(info *backtest.BarInfo) error {
 	return errors.New("please set backtest mode first")
 }
 
-func GetRuntimeEvents() (interface{}, error) {
+func GetRuntimeEvents() (map[string]interface{}, error) {
 	if Backtest != nil {
 		return Backtest.GetRuntimeEvents(), nil
 	}
