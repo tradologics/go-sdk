@@ -175,7 +175,7 @@ func (b *Backtest) SetCurrentBarInfo(info *BarInfo) {
 	b.currentBarInfo = info
 }
 
-func (b *Backtest) GetRuntimeEvents() interface{} {
+func (b *Backtest) GetRuntimeEvents() map[string]interface{} {
 	return b.runtimeEvents
 }
 
