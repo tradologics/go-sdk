@@ -59,7 +59,11 @@ type Backtest struct {
 	zmqConn        *ZmqConn
 }
 
+// NewBacktest create new Backtest object with selected start,
+// end dates and create new ZMQ connection using chosen socket URL
 func NewBacktest(start, end, socketUrl string) (*Backtest, error) {
+
+	// Create new ZMQ connection
 	zmqConn, err := NewZmq(socketUrl)
 	if err != nil {
 		return nil, err
@@ -73,7 +77,11 @@ func NewBacktest(start, end, socketUrl string) (*Backtest, error) {
 	}, nil
 }
 
+// CallErocMethod parse client request data and use it to create new EROC request and send data using ZMQ;
+// Returns EROC response as HTTP response.
 func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
+
+	// Parse request data as JSON to erocRequestData structure
 	erocRequestData := ErocRequestData{}
 
 	if req.Body != nil {
@@ -111,6 +119,7 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 		return b.errorHandler(req, err, DefaultErrorMessage)
 	}
 
+	// Set runtime events
 	b.runtimeEvents = erocResponse.Events
 
 	erocJSONResponse, err := json.Marshal(BacktestResponse{
@@ -139,7 +148,9 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 
 }
 
+// errorHandler returns HTTP Bad Gateway error if something unexpected happened inside CallErocMethod function
 func (b *Backtest) errorHandler(req *http.Request, err error, message string) *http.Response {
+
 	// Log source error
 	if err != nil {
 		log.Println(err)
@@ -171,14 +182,17 @@ func (b *Backtest) errorHandler(req *http.Request, err error, message string) *h
 	return res
 }
 
+// SetCurrentBarInfo set currentBarInfo datetime and resolution
 func (b *Backtest) SetCurrentBarInfo(info *BarInfo) {
 	b.currentBarInfo = info
 }
 
+// GetRuntimeEvents returns current Backtest events data
 func (b *Backtest) GetRuntimeEvents() map[string]interface{} {
 	return b.runtimeEvents
 }
 
+// Close ZMQ connection
 func (b *Backtest) Close() {
 	b.zmqConn.Close()
 }

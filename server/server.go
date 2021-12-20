@@ -8,6 +8,7 @@ import (
 
 var strategyHandler func(w http.ResponseWriter, r *http.Request)
 
+// postMethodOnlyHandler validate request method and execute only 'POST'
 func postMethodOnlyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		strategyHandler(w, r)
@@ -20,6 +21,7 @@ func postMethodOnlyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// router returns http server mux with selected handler and URL path
 func router(strategy func(w http.ResponseWriter, r *http.Request), endpoint string) http.Handler {
 	strategyHandler = strategy
 
@@ -29,6 +31,7 @@ func router(strategy func(w http.ResponseWriter, r *http.Request), endpoint stri
 	return router
 }
 
+// Start create new server with selected host and port, and use strategy as request handler
 func Start(strategy func(w http.ResponseWriter, r *http.Request), endpoint, host string, port int) {
 	err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router(strategy, endpoint))
 	if err != nil {
