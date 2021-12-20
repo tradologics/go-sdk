@@ -977,3 +977,27 @@ func TestBacktestNewPostRequestWithoutInfoAndInvalidFieldValue(t *testing.T) {
 		"{\"errors\":[{\"id\":\"invalid_request\",\"message\":\"data.type should be equal to one of the allowed values\"}],\"data\":null}"),
 	)
 }
+
+func TestBacktestPostInvalidJSON(t *testing.T) {
+	turnOnBacktestModel()
+	defer removeBacktestMode()
+
+	res, err := Post("/monitors", "application/json", bytes.NewBuffer([]byte("")))
+	if err != nil {
+		assert.NoError(t, err)
+	}
+
+	assert.Equal(t, 502, res.StatusCode)
+
+	defer cls(res.Body)
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		assert.NoError(t, err)
+	}
+
+	assert.True(t, strings.Contains(
+		string(body),
+		"{\"status\":502,\"errors\":[{\"id\":\"internal_server_error\",\"message\":\"Invalid JSON\"}],\"data\":{}"),
+	)
+}

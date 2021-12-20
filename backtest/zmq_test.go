@@ -69,6 +69,7 @@ func TestSendJZMQMessageAndRetrieveResponse(t *testing.T) {
 	assert.Equal(t, "", string(msg[0]), "invalid server message")
 }
 
+// TODO
 func TestSendZMQMessageJSONAndRetrieveResponse(t *testing.T) {
 
 }

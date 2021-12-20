@@ -1,4 +1,4 @@
-### Dependencies
+# Dependencies
 
 > Note: `be careful when you click on links if you are using GitHub dark theme (take care of your eyes).`
 

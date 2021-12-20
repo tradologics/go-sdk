@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+const DefaultErrorMessage = "Something bad happen"
+
 type ErocRequestHeader struct {
 	Start      string `json:"start"`
 	End        string `json:"end"`
@@ -77,12 +79,12 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 	if req.Body != nil {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return b.errorHandler(req, err)
+			return b.errorHandler(req, err, DefaultErrorMessage)
 		}
 
 		err = json.Unmarshal(body, &erocRequestData)
 		if err != nil {
-			return b.errorHandler(req, err)
+			return b.errorHandler(req, err, "Invalid JSON")
 		}
 	}
 
@@ -100,13 +102,13 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 
 	err := b.zmqConn.SendJSON(&erocRequest)
 	if err != nil {
-		return b.errorHandler(req, err)
+		return b.errorHandler(req, err, DefaultErrorMessage)
 	}
 
 	var erocResponse ErocResponse
 	err = b.zmqConn.ReceiveJSON(&erocResponse)
 	if err != nil {
-		return b.errorHandler(req, err)
+		return b.errorHandler(req, err, DefaultErrorMessage)
 	}
 
 	b.runtimeEvents = erocResponse.Events
@@ -116,7 +118,7 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 		Data:   erocResponse.Data,
 	})
 	if err != nil {
-		return b.errorHandler(req, err)
+		return b.errorHandler(req, err, DefaultErrorMessage)
 	}
 
 	res := &http.Response{
@@ -137,13 +139,16 @@ func (b *Backtest) CallErocMethod(req *http.Request) *http.Response {
 
 }
 
-func (b *Backtest) errorHandler(req *http.Request, err error) *http.Response {
-	// TODO find correct error message
+func (b *Backtest) errorHandler(req *http.Request, err error, message string) *http.Response {
+	// Log source error
+	if err != nil {
+		log.Println(err)
+	}
+
 	erocJSONResponse, err := json.Marshal(ErocResponse{
 		Status: 502,
-		Errors: []ErocError{{ID: "internal_server_error", Message: "internal server error"}},
+		Errors: []ErocError{{ID: "internal_server_error", Message: message}},
 		Data:   make(map[string]interface{}),
-		Events: RuntimeEvents{},
 	})
 	if err != nil {
 		log.Fatalln(err)
