@@ -2,10 +2,10 @@
 
 > Note: `be careful when you click on links if you are using GitHub dark theme (take care of your eyes).`
 
-| Library | Links                                                                                                                  |
-|---------|------------------------------------------------------------------------------------------------------------------------|
-| libzmq  | [GitHub](https://build.opensuse.org/project/show/network:messaging:zeromq:git-stable) / [Docs](http://api.zeromq.org/) |
-| CZMQ    | [GitHub](https://github.com/zeromq/czmq) / [Docs](http://czmq.zeromq.org/)                                             |
+| Library | Links                                                                       |
+|---------|-----------------------------------------------------------------------------|
+| libzmq  | [GitHub](https://github.com/zeromq/libzmq) / [Docs](http://api.zeromq.org/) |
+| CZMQ    | [GitHub](https://github.com/zeromq/czmq) / [Docs](http://czmq.zeromq.org/)  |
 
 Follow the instructions below to download and install the selected ZeroMQ library.
 
