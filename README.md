@@ -67,7 +67,7 @@ import (
 	"net/http"
 )
 
-func strategyHandler(w http.ResponseWriter, r *http.Request) {
+func strategyHandler(tradehook string, payload []byte) {
 	...
 }
 
