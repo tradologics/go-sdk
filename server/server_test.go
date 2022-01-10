@@ -22,10 +22,7 @@ func TestRunServerWithStrategy(t *testing.T) {
 
 	// Create handler
 	strategy := func(tradehook string, payload []byte) {
-		var payloadData struct {
-			Assets []string    `json:"assets"`
-			Bars   interface{} `json:"bars"`
-		}
+		var payloadData map[string]interface{}
 
 		err := json.Unmarshal(payload, &payloadData)
 		if err != nil {
@@ -33,7 +30,7 @@ func TestRunServerWithStrategy(t *testing.T) {
 		}
 
 		assert.Equal(t, "bars", tradehook, invalidErrorMsg)
-		assert.NotEqualf(t, 0, len(payloadData.Assets), invalidErrorMsg)
+		assert.NotEqualf(t, 0, len(payloadData), invalidErrorMsg)
 	}
 
 	// Start server
@@ -53,11 +50,11 @@ func TestRunServerWithStrategy(t *testing.T) {
 
 	// Post request
 	data, err := json.Marshal(struct {
-		Tradehook string
-		Payload   []byte
+		Event string            `json:"event"`
+		Data  map[string]string `json:"data"`
 	}{
-		Tradehook: "bars",
-		Payload:   []byte("{\n  \"assets\": [\"AAPL:US\", \"BTCUSD:BMEX\", \"...\"],\n  \"bars\": {\n    \"YYYY-MM-01\": {\n      \"AAPL\": {\n        \"o\": \"113.79\",\n        \"h\": \"117.26\",\n        \"l\": \"113.62\",\n        \"c\": \"115.56\",\n        \"v\": 136210200,\n        \"t\": 782692,\n        \"w\": \"116.11665173913042\"\n      },\n      \"BTCUSD:BMEX\": {\n        \"o\": \"...\",\n        \"h\": \"...\",\n        \"l\": \"...\",\n        \"c\": \"...\",\n        \"v\": \"...\",\n        \"t\": \"...\",\n        \"w\": \"...\"\n      }\n    }\n  }\n}"),
+		Event: "bars",
+		Data:  map[string]string{"foo": "boo", "boo": "foo"},
 	})
 
 	res, err = http.Post(fmt.Sprintf("%s/", server.URL), "", ioutil.NopCloser(bytes.NewBuffer(data)))

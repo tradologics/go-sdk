@@ -12,10 +12,7 @@ var strategyHandler func(tradehook string, payload []byte)
 
 // strategyWrapper retrieve tradehook information from response body and send it to customer strategy
 func strategyWrapper(w http.ResponseWriter, r *http.Request) {
-	var requestBody struct {
-		Tradehook string `json:"tradehook"`
-		Payload   []byte `json:"payload"`
-	}
+	var requestBody map[string]interface{}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -26,8 +23,13 @@ func strategyWrapper(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	rawData := requestBody["data"]
+	data, err := json.Marshal(&rawData)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	strategyHandler(requestBody.Tradehook, requestBody.Payload)
+	strategyHandler(fmt.Sprintf("%v", requestBody["event"]), data)
 
 	w.WriteHeader(200)
 	_, err = w.Write([]byte(http.StatusText(http.StatusOK)))
