@@ -3,6 +3,7 @@ module github.com/tradologics/go-sdk
 go 1.17
 
 require (
+	github.com/joho/godotenv v1.4.0
 	github.com/stretchr/testify v1.7.0
 	gopkg.in/zeromq/goczmq.v4 v4.1.0
 )
