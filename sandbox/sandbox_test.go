@@ -269,3 +269,29 @@ func TestOrderRejectedTradehook(t *testing.T) {
 	authInit()
 	validateMethod(t, OrderRejected, kindOrder, orderPayload{})
 }
+
+func TestTradehookWithArgs(t *testing.T) {
+	authInit()
+
+	Tradehook(
+		kindBar,
+		// strategy function
+		func(tradehook string, payload []byte) {
+			var p barPayload
+
+			assert.Equal(t, kindBar, tradehook)
+
+			if err := json.Unmarshal(payload, &p); err != nil {
+				assert.NoError(t, err)
+			}
+		},
+		map[string]interface{}{
+			"assets":     5,
+			"resolution": "1day",
+			"start":      "2020-05-05",
+			"end":        "2020-06-06",
+			"foo":        false,
+			"boo":        int64(1),
+		},
+	)
+}
