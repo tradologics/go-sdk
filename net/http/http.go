@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tradologics/go-sdk/backtest"
+	"github.com/tradologics/go-sdk/config"
 	"io"
 	"log"
 	_http "net/http"
@@ -95,12 +96,16 @@ func (c *Client) processRequest(method, url, contentType string, body io.Reader,
 		return nil, err
 	}
 
+	// Set auth header
 	if _, ok := req.Header["Authorization"]; !ok {
 		if Token == "" && !IsBacktest {
 			return nil, errors.New("please use `SetToken(...)` first")
 		}
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", Token))
 	}
+
+	// Set client version header
+	req.Header.Set("TGX-CLIENT", fmt.Sprintf("go-sdk/%s", config.Version))
 
 	if strings.HasSuffix(req.URL.Path, "/") {
 		req.URL.Path = req.URL.Path[:len(req.URL.Path)-1]

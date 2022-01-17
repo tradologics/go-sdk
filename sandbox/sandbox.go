@@ -2,7 +2,7 @@ package sandbox
 
 import (
 	"fmt"
-	go_sdk "github.com/tradologics/go-sdk"
+	"github.com/tradologics/go-sdk/config"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -36,7 +36,7 @@ func Tradehook(kind string, strategy func(string, []byte), args map[string]inter
 
 	// Add user auth token and client version
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", Token))
-	req.Header.Set("TGX-CLIENT", fmt.Sprintf("go-sdk/%s", go_sdk.Version))
+	req.Header.Set("TGX-CLIENT", fmt.Sprintf("go-sdk/%s", config.Version))
 
 	if len(args) > 0 {
 		values := req.URL.Query()

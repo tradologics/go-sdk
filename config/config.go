@@ -1,4 +1,4 @@
-package go_sdk
+package config
 
 import (
 	"github.com/joho/godotenv"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	Version = "v0.1.2"
+	Version = "0.2.0"
 )
 
 type TestConfig struct {
@@ -17,12 +17,16 @@ type TestConfig struct {
 
 var TestCfg *TestConfig
 
-func GetTestConfig() *TestConfig {
+func GetTestConfig(envPath ...string) *TestConfig {
 	if TestCfg != nil {
 		return TestCfg
 	}
 
-	InitEnv()
+	if len(envPath) > 0 {
+		InitEnv(envPath[0])
+	} else {
+		InitEnv()
+	}
 
 	TestCfg = &TestConfig{
 		SandboxURL:   getEnvString("TEST_SANDBOX_URL", ""),
@@ -32,9 +36,15 @@ func GetTestConfig() *TestConfig {
 	return TestCfg
 }
 
-func InitEnv() {
-	if err := godotenv.Load("../.env"); err != nil {
-		log.Print(".env file not found")
+func InitEnv(envPath ...string) {
+	if len(envPath) > 0 {
+		if err := godotenv.Load(envPath[0]); err != nil {
+			log.Print(".env file not found")
+		}
+	} else {
+		if err := godotenv.Load(); err != nil {
+			log.Print(".env file not found")
+		}
 	}
 }
 

@@ -3,7 +3,7 @@ package sandbox
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	go_sdk "github.com/tradologics/go-sdk"
+	"github.com/tradologics/go-sdk/config"
 	"testing"
 	"time"
 )
@@ -63,7 +63,7 @@ type orderPayload struct {
 }
 
 func authInit() {
-	cfg := go_sdk.GetTestConfig()
+	cfg := config.GetTestConfig("../.env")
 	setSandboxURL(cfg.SandboxURL)
 	SetToken(cfg.SandboxToken)
 }
@@ -106,7 +106,7 @@ func TestTradehookValidToken(t *testing.T) {
 }
 
 func TestTradehookInvalidToken(t *testing.T) {
-	cfg := go_sdk.GetTestConfig()
+	cfg := config.GetTestConfig()
 	setSandboxURL(cfg.SandboxURL)
 	SetToken("")
 

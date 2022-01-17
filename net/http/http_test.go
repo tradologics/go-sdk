@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/tradologics/go-sdk/backtest"
+	"github.com/tradologics/go-sdk/config"
 	"io"
 	"log"
 	"reflect"
@@ -15,7 +16,10 @@ import (
 
 const invalidErrorMsg = "invalid response"
 
-const token = ""
+func authInit() {
+	cfg := config.GetTestConfig("../../.env")
+	SetToken(cfg.SandboxToken)
+}
 
 func turnOnBacktestModel() {
 	err := SetBacktestMode("2021-01-01 21:00:00.000000", "2021-01-08 21:00:00.000000")
@@ -39,7 +43,7 @@ func removeBacktestMode() {
 }
 
 func removeToken() {
-	Token = ""
+	SetToken("")
 }
 
 func cls(b io.ReadCloser) {
@@ -130,7 +134,7 @@ func TestTradologicsGetWithEmptyToken(t *testing.T) {
 }
 
 func TestTradologicsGetWithToken(t *testing.T) {
-	SetToken(token)
+	authInit()
 	defer removeToken()
 
 	res, err := Get("/me")
@@ -192,7 +196,7 @@ func TestTradologicsPostWithEmptyToken(t *testing.T) {
 }
 
 func TestTradologicsPostWithToken(t *testing.T) {
-	SetToken(token)
+	authInit()
 	defer removeToken()
 
 	payload, err := json.Marshal(map[string]interface{}{
@@ -277,7 +281,7 @@ func TestTradologicsNewRequestWithEmptyToken(t *testing.T) {
 }
 
 func TestTradologicsNewRequestWithToken(t *testing.T) {
-	SetToken(token)
+	authInit()
 	defer removeToken()
 
 	payload, err := json.Marshal(map[string]interface{}{
