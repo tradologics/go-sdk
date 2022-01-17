@@ -24,6 +24,7 @@ func setSandboxURL(url string) {
 	SandboxURL = url
 }
 
+// Tradehook retrieve response example. Only int, string, bool are valid args values types.
 func Tradehook(kind string, strategy func(string, []byte), args map[string]interface{}) {
 	client := http.DefaultClient
 	url := fmt.Sprintf("%s/%s", SandboxURL, strings.ReplaceAll(kind, "_", "/"))
@@ -33,6 +34,7 @@ func Tradehook(kind string, strategy func(string, []byte), args map[string]inter
 		log.Fatalln(err)
 	}
 
+	// Add user auth token and client version
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", Token))
 	req.Header.Set("TGX-CLIENT", fmt.Sprintf("go-sdk/%s", go_sdk.Version))
 
