@@ -12,6 +12,7 @@ const (
 	kindBar      = "bar"
 	kindError    = "error"
 	kindInvalid  = "foo"
+	kindPrice    = "price"
 	kindPosition = "position"
 	kindOrder    = "order"
 )
@@ -177,17 +178,15 @@ func TestPositionMonitorExpiredTradehook(t *testing.T) {
 	validateMethod(t, PositionMonitorExpired, kindPosition, monitorPayload{})
 }
 
-//// TODO pricing api bug
-//func TestPriceMonitorTradehook(t *testing.T) {
-//	authInit()
-//	validateMethod(t, PriceMonitor, kindPosition, monitorPayload{})
-//}
-//
-//// TODO pricing api bug
-//func TestPriceMonitorExpiredTradehook(t *testing.T) {
-//	authInit()
-//	validateMethod(t, PriceMonitorExpired, kindPosition, monitorPayload{})
-//}
+func TestPriceMonitorTradehook(t *testing.T) {
+	authInit()
+	validateMethod(t, PriceMonitor, kindPrice, monitorPayload{})
+}
+
+func TestPriceMonitorExpiredTradehook(t *testing.T) {
+	authInit()
+	validateMethod(t, PriceMonitorExpired, kindPrice, monitorPayload{})
+}
 
 func TestErrorTradehook(t *testing.T) {
 	authInit()
@@ -207,7 +206,6 @@ func TestErrorTradehook(t *testing.T) {
 			assert.Equal(t, "sandbox_error", p.Errors[0].ID)
 			assert.Equal(t, "sandbox message error", p.Errors[0].Message)
 		},
-		//
 		nil,
 	)
 }
